@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import Table from '../Activities/ActivityTable';
@@ -10,6 +10,8 @@ import AddForm, { IFormData } from './AddForm';
 import { ITab } from '../../../features/TabList';
 import { IconNames } from '../../../components/Icon';
 import * as constant from './constant';
+import { addActivity, getActivites } from '../../../api/apiLayer';
+import { IActivityData, IActivity } from '../../../interfaces';
 
 const tabs: ITab[] = [
   { label: constant.ALL_ACTIVITY_LABEL },
@@ -26,32 +28,51 @@ const Box = (): JSX.Element => (
 
 const ActivityDashboard = (): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
+  const [activities, setActivities] = useState<IActivity[]>([]);
   const { businessId } = useParams();
 
   const onSubmit = async (data: IFormData): Promise<void> => {
-    // TODO: Add endpoints for following values
-    const reqData = {
-      activityId: '',
-      title: data.activityTitle,
-      location: data.activityLocation,
-      startDate: data.activityStart,
-      endDate: data.activityEnd,
-      description: data.activityDescription,
-      costPerPerson: data.activityCostIndv,
-      costPerGroup: data.activityCostGroup,
-      groupSize: data.activityGroupSize,
-      image: data.activityImage,
-      businessId,
-    };
-    await fetch('', {
-      method: 'POST', // TODO: --- THIS IS A PLACEHOLDER --- Add correct endpoints for activities
-      headers: {
-        'Content-Type': 'application/json',
+    const reqData: IActivityData = {
+      activity: {
+        title: data.activityTitle,
+        description: data.activityDescription,
+        costPerIndividual: parseFloat(data.activityCostIndv),
+        costPerGroup: parseFloat(data.activityCostGroup),
+        groupSize: parseFloat(data.activityGroupSize),
+        startTime: data.activityStart,
+        endTime: data.activityEnd,
       },
-      body: JSON.stringify(reqData),
-    });
+      address: { // TODO: Add address information to form
+        mention: data.activityLocation,
+        lineOne: '1234 Main Street',
+        lineTwo: '',
+        city: 'Montreal',
+        state: 'QC',
+        country: 'Canada',
+        postalCode: 'EXAMPLE',
+      },
+      // image: data.activityImage,  // TODO: Add image information
+    };
+    await addActivity((businessId ?? ''), reqData);
   };
 
+  useEffect(() => {
+    void (async function getAllEmployees() {
+      await getActivites((businessId ?? '')).then(async (res) => {
+        const { activities } = res;
+        const activitiesArray = activities.map(activity => ({
+          ...activity,
+        }));
+        setActivities(activitiesArray);
+      }).catch(error => {
+        if (error?.cause !== 1) {
+          alert(error.message);
+        }
+      });
+    })();
+  }, [businessId]);
+
+  console.log(activities);
   return (
     <>
       <PageHeader

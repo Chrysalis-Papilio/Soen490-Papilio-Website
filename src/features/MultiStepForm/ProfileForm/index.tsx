@@ -52,7 +52,8 @@ const inputs: InputInterface[] = [
 ];
 
 const ProfileForm = ({ initialState, onSubmit }: IProfileForm): JSX.Element => {
-  const [formData, onValueChange, submit] = useFormData<any>({ initialState, onSubmit });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_unused1, _unused2, _unused3, register, submit] = useFormData<any>({ initialState, onSubmit });
 
   return (
     <>
@@ -61,13 +62,11 @@ const ProfileForm = ({ initialState, onSubmit }: IProfileForm): JSX.Element => {
       {inputs.map(({ name, label }) => (
         <Input
           key={name}
-          name={name}
+          {...register(name, { required: false, pattern: /.*/ })}
           placeholder=''
-          value={formData[name]}
           label={label}
           size='sm'
           labelPosition='left'
-          onChange={onValueChange}
           hasLabel
         />
       ))}

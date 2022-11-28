@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { sendSignInLinkToEmail } from 'firebase/auth';
-// import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 import { auth } from '../../../firebase';
 import Table from '../../../features/Table';
@@ -12,7 +12,9 @@ import AddForm, { IFormData } from './AddForm';
 import { ITab } from '../../../features/TabList';
 import { IconNames } from '../../../components/Icon';
 import * as constant from './constant';
-import { useParams } from 'react-router-dom';
+import { addEmployee, getEmployees } from '../../../api/apiLayer';
+import { IEmployeeData } from '../../../interfaces';
+import { useAuth } from '../../../hooks/useEmployee';
 
 const tabs: ITab[] = [
   { label: constant.ALL_EMPLOYEES_LABEL },
@@ -30,25 +32,23 @@ const Box = (): JSX.Element => (
 );
 
 const EmployeeDashboard = (): JSX.Element => {
+  const { employee } = useAuth();
   const { businessId } = useParams();
   const [employees, setEmployees] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
   const onSubmit = async (data: IFormData): Promise<void> => {
-    const reqData = {
+    const reqData: IEmployeeData = {
       firebaseId: '',
       email: data.employeeEmail,
-      name: data.employeeName,
-      businessId,
+      firstName: data.employeeFirstName,
+      lastName: data.employeeLastName,
+      businessId: (businessId ?? ''),
+      role: data.role,
       root: false, // True only while creating the business
     };
-    await fetch(`/api/business/addEmployee/${businessId ?? ''}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(reqData),
-    }).then(async () => {
+
+    await addEmployee((businessId ?? ''), reqData).then(async () => {
       await sendSignInLinkToEmail(auth, data.employeeEmail, {
         url: 'https://localhost:3000/email-signin',
       }).then(() => {
@@ -57,16 +57,39 @@ const EmployeeDashboard = (): JSX.Element => {
     });
   };
 
+  const ActionList = (): JSX.Element => {
+    if (employee.role !== 'Admin') { return <></>; }
+    return (<Button
+      text={constant.ADD_EMPLOYEE_BUTTON}
+      hasIcon={true}
+      icon={IconNames.ADD}
+      iconPosition='lhs'
+      variant='outline'
+      onClick={() => { setIsOpen(!isOpen); }}
+      size='sm'
+    />);
+  };
+
   useEffect(() => {
-    void (async function getEmployees () {
-      await fetch(`/api/business/get/${businessId ?? ''}/employees`, {
-        method: 'GET',
-      }).then(res => {
+    void (async function getAllEmployees() {
+      await getEmployees((businessId ?? '')).then(async (res) => {
         // @ts-expect-error
-        setEmployees(res.body);
+        const { employees } = res;
+        // @ts-expect-error
+        const employeeArray = employees.map(employee => ({
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          name: `${employee.firstName} ${employee.lastName}`,
+          email: employee.email,
+          role: employee.role,
+        }));
+        setEmployees(employeeArray);
+      }).catch(error => {
+        if (error?.cause !== 1) {
+          alert(error.message);
+        }
       });
     })();
-  }, []);
+  }, [businessId]);
 
   console.log(employees);
   return (
@@ -83,17 +106,7 @@ const EmployeeDashboard = (): JSX.Element => {
       />
       <ListBanner
         tabs={tabs}
-        rhs={
-          <Button
-            text={constant.ADD_EMPLOYEE_BUTTON}
-            hasIcon={true}
-            icon={IconNames.ADD}
-            iconPosition='lhs'
-            variant='outline'
-            onClick={() => { setIsOpen(!isOpen); }}
-            size='sm'
-          />
-        }
+        rhs={<ActionList />}
       />
       <div className='p-3'>
         {isOpen ? (<AddForm onSubmit={onSubmit} />) : (<Table />)}

@@ -16,7 +16,7 @@ module.exports = {
       version: 'detect',
     },
   },
-  ignorePatterns: ['.eslintrc.js', 'jest.config.js'],
+  ignorePatterns: ['.eslintrc.js', 'jest.config.js', 'sonarqube-scanner.js'],
   plugins: ['react', '@typescript-eslint'],
   rules: {
     quotes: ['error', 'single', { avoidEscape: true }],
@@ -68,6 +68,22 @@ module.exports = {
         checksVoidReturn: {
           arguments: false,
         },
+      },
+    ],
+    'space-before-function-paren': [
+      'error',
+      {
+        anonymous: 'always',
+        named: 'never',
+        asyncArrow: 'always',
+      },
+    ],
+    '@typescript-eslint/space-before-function-paren': [
+      'error',
+      {
+        anonymous: 'always',
+        named: 'never',
+        asyncArrow: 'always',
       },
     ],
   },

@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
@@ -5,6 +6,8 @@ import BusinessForm, { IFormData as BusinessFormData } from './BusinessForm';
 import MultiStepForm, { Progress, Step, IFormData as InfoFormData } from '../../features/MultiStepForm';
 import LoginForm, { IFormData as LoginFormData } from './LoginForm';
 import { auth } from '../../firebase';
+import { addBusiness, getBusiness } from '../../api/apiLayer';
+import { useAuth } from '../../hooks/useEmployee';
 
 export declare interface ILoginPage {
   type: 'business' | 'businessLogic' | 'login'
@@ -38,13 +41,13 @@ const steps: Step[] = [
   },
   {
     stepId: 'validation',
-    // title: 'Your business is being created',
     caption: "Let's create your business",
     last: true,
   },
 ];
 
 const LoginPage = ({ type }: ILoginPage): JSX.Element => {
+  const { login, register } = useAuth();
   const navigate = useNavigate();
   let content: React.ReactNode;
   let onSubmit;
@@ -52,7 +55,7 @@ const LoginPage = ({ type }: ILoginPage): JSX.Element => {
   switch (type) {
     case 'businessLogic':
       onSubmit = async (data: InfoFormData) => {
-        createUserWithEmailAndPassword(auth, data.adminAccount.adminEmail, data.adminAccount.adminPassword)
+        return await createUserWithEmailAndPassword(auth, data.adminAccount.adminEmail, data.adminAccount.adminPassword)
           .then(async (userCredential) => {
             // Signed in
             const user = userCredential.user;
@@ -70,27 +73,26 @@ const LoginPage = ({ type }: ILoginPage): JSX.Element => {
                 ...rest,
               },
               employee: {
-                firstName: data.adminAccount.adminName.split(' ')[0],
-                lastName: data.adminAccount.adminName.split(' ')[1],
+                firstName: data.adminAccount.adminFirstName,
+                lastName: data.adminAccount.adminLastName,
                 email: data.adminAccount.adminEmail,
                 firebase_id: user.uid,
                 role: data.adminAccount.role,
                 root: true,
               },
             };
-            await fetch('/api/business/createBusiness', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(reqData),
-            }).then(res => {
-              console.log(res);
+            return await addBusiness(reqData);
+          })
+          .then(res => {
+            if (res.status === 400) {
+              throw new Error('error');
+            } else {
+              register(res);
               navigate(`/${data.businessId}/dashboard`, {
                 replace: true,
                 relative: 'route',
               });
-            });
+            }
           })
           .catch((error) => {
             const errorCode = error.code;
@@ -102,10 +104,7 @@ const LoginPage = ({ type }: ILoginPage): JSX.Element => {
       break;
     case 'business':
       onSubmit = async (data: BusinessFormData) => {
-        await fetch(`/api/business/get/${data.businessId}`, {
-          method: 'GET',
-          mode: 'no-cors',
-        }).then(res => {
+        await getBusiness(data.businessId).then(res => {
           if (res.status === 200) {
             navigate('admin', {
               replace: true,
@@ -123,22 +122,20 @@ const LoginPage = ({ type }: ILoginPage): JSX.Element => {
       onSubmit = async (data: LoginFormData) => {
         const email = data.email;
         const password = data.password;
-        signInWithEmailAndPassword(auth, email, password)
+        return await signInWithEmailAndPassword(auth, email, password)
           .then(async (userCredential) => {
-            const user = userCredential.user;
-            // added to clear the error user is not used
-            console.log(user);
-
-            navigate('{data.businessId/dashboard', {
-              replace: true,
-              relative: 'route',
+            const { user } = userCredential;
+            return login({
+              name: '',
+              firebaseId: user.uid,
+              businessId: data.businessId,
+              role: '',
             });
           })
-          .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorCode, errorMessage);
-          });
+          .then(() => navigate(`${data.businessId}/dashboard`, {
+            replace: true,
+            relative: 'route',
+          }));
       };
       content = (<LoginForm onSubmit={onSubmit}/>);
       break;

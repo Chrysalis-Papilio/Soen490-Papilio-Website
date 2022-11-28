@@ -1,4 +1,4 @@
-import { screen, render } from '@testing-library/react';
+import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import ProfilForm, { IFormData } from '.';
@@ -27,15 +27,15 @@ describe('profile form test', () => {
     const mockOnSubmit = jest.fn();
     render(<ProfilForm initialState={initialState} onSubmit={mockOnSubmit} />);
 
-    userEvent.type(screen.getByRole('textbox', { name: /Business name/i }), 'My Awesome Business');
-    userEvent.type(screen.getByRole('textbox', { name: /Address/i }), '1234 Awesome St');
-    userEvent.type(screen.getByRole('textbox', { name: /Postal Code/i }), 'H3B 5G1');
-    userEvent.type(screen.getByRole('textbox', { name: /City/i }), 'Montreal');
-    userEvent.type(screen.getByRole('textbox', { name: /Province/i }), 'QC');
-    userEvent.type(screen.getByRole('textbox', { name: /Country/i }), 'Canada');
-    userEvent.click(screen.getByText('Next'));
+    userEvent.type(await screen.findByRole('textbox', { name: /Business name/i }), 'My Awesome Business');
+    userEvent.type(await screen.findByRole('textbox', { name: /Address/i }), '1234 Awesome St');
+    userEvent.type(await screen.findByRole('textbox', { name: /Postal Code/i }), 'H3B 5G1');
+    userEvent.type(await screen.findByRole('textbox', { name: /City/i }), 'Montreal');
+    userEvent.type(await screen.findByRole('textbox', { name: /Province/i }), 'QC');
+    userEvent.type(await screen.findByRole('textbox', { name: /Country/i }), 'Canada');
+    userEvent.click(await screen.findByText('Next'));
 
-    expect(mockOnSubmit).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockOnSubmit).toHaveBeenCalledWith(
       {
         businessName: 'My Awesome Business',
         addressLineOne: '1234 Awesome St',
@@ -45,6 +45,6 @@ describe('profile form test', () => {
         country: 'Canada',
         province: 'QC',
       }
-    );
+    ));
   });
 });

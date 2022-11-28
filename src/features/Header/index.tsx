@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
 
 const Header = (): JSX.Element => {
+  const navigate = useNavigate();
   return (
     <div className='flex flex-row justify-end items-center gap-1'>
       <span className='hover:border-b-2 border-brand-orange cursor-pointer box-border'>Features</span>
@@ -8,13 +10,15 @@ const Header = (): JSX.Element => {
       <span>Blog</span>
       <Button
         text='Login'
-        onClick={() => {}}
+        onClick={() => {
+          navigate('/login');
+        }}
         variant='outline'
         margin='left'
       />
       <Button
         text='Getting start'
-        onClick={() => {}}
+        onClick={() => { navigate('/admin'); }}
         margin='left'
       />
     </div>

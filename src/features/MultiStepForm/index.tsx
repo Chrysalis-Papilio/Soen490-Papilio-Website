@@ -70,7 +70,8 @@ export const initialState: IFormData = {
     province: '',
   },
   adminAccount: {
-    adminName: '',
+    adminFirstName: '',
+    adminLastName: '',
     adminEmail: '',
     adminPassword: '',
     role: 'Admin',

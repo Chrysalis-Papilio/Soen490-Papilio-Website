@@ -6,6 +6,7 @@ import ErrorPage from './pages/Error';
 import LoginPage from './pages/Login';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { AuthProvider } from './context/employeeContext';
 
 const router = createBrowserRouter([
   {
@@ -52,7 +53,9 @@ const router = createBrowserRouter([
 
 const App = (): JSX.Element => {
   return (
-    <RouterProvider router={router}/>
+    <AuthProvider>
+      <RouterProvider router={router}/>
+    </AuthProvider>
   );
 };
 
