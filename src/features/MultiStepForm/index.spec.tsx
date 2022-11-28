@@ -40,7 +40,7 @@ const steps: Step[] = [
 ];
 
 describe('multi step form test', () => {
-  it('should have the business profile as first page and admin form on the second and validation as last page', () => {
+  it('should have the business profile as first page and admin form on the second and validation as last page', async () => {
     const mockOnSubmit = jest.fn();
     render(
       <MemoryRouter initialEntries={[{ state: { businessId: 'business1' } }]}>
@@ -48,14 +48,14 @@ describe('multi step form test', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(ProfileConstant.FORM_TITLE)).toBeInTheDocument();
-    userEvent.click(screen.getByText('Next'));
-    expect(screen.getByText(AdminConstant.FORM_TITLE)).toBeInTheDocument();
-    userEvent.click(screen.getByText('Next'));
-    expect(screen.getByText(/Finish Yeah!!!/)).toBeInTheDocument();
+    expect(await screen.findByText(ProfileConstant.FORM_TITLE)).toBeInTheDocument();
+    userEvent.click(await screen.findByText('Next'));
+    expect(await screen.findByText(AdminConstant.FORM_TITLE)).toBeInTheDocument();
+    userEvent.click(await screen.findByText('Next'));
+    expect(await screen.findByText(/Finish Yeah!!!/)).toBeInTheDocument();
   });
 
-  it('should save the data and display them on back', () => {
+  it('should save the data and display them on back', async () => {
     const mockOnSubmit = jest.fn();
     render(
       <MemoryRouter initialEntries={[{ state: { businessId: 'business1' } }]}>
@@ -63,10 +63,10 @@ describe('multi step form test', () => {
       </MemoryRouter>);
 
     const name = 'My Awesome Business';
-    userEvent.type(screen.getByRole('textbox', { name: 'Business name' }), name);
-    userEvent.click(screen.getByText('Next'));
-    userEvent.click(screen.getByText('Back'));
+    userEvent.type(await screen.findByRole('textbox', { name: 'Business name' }), name);
+    userEvent.click(await screen.findByText('Next'));
+    userEvent.click(await screen.findByText('Back'));
 
-    expect(screen.getByDisplayValue(name)).toBeInTheDocument();
+    expect(await screen.findByDisplayValue(name)).toBeInTheDocument();
   });
 });

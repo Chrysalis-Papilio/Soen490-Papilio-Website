@@ -20,33 +20,28 @@ const initialState: IFormData = {
 };
 
 const AddForm = ({ onSubmit }: AddFormInterface): JSX.Element => {
-  const [formData, onValueChange, submit] = useFormData<IFormData>({ initialState, onSubmit });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_unused1, _unused2, _unused3, register, submit] = useFormData<IFormData>({ initialState, onSubmit });
 
   return (
     <div>
       <h2 className="text-2xl font-semibold mt-4.5">{constant.FORM_HEADLINE}</h2>
       <Input
-        name={constant.INPUT_EMPLOYEE_NAME}
-        value={formData.employeeName}
+        {...register(constant.INPUT_EMPLOYEE_NAME, { required: false, pattern: /.*/ })}
         placeholder={constant.INPUT_EMPLOYEE_NAME_PLACEHOLDER}
         label={constant.INPUT_EMPLOYEE_NAME_LABEL}
-        onChange={onValueChange}
         hasLabel
       />
       <Input
-        name={constant.INPUT_EMPLOYEE_EMAIL}
-        value={formData.employeeEmail}
+        {...register(constant.INPUT_EMPLOYEE_EMAIL, { required: false, pattern: /.*/ })}
         placeholder={constant.INPUT_EMPLOYEE_EMAIL_PLACEHOLDER}
         label={constant.INPUT_EMPLOYEE_EMAIL_LABEL}
-        onChange={onValueChange}
         hasLabel
       />
       <Input
-        name={constant.INPUT_ROLE}
-        value={formData.role}
+        {...register(constant.INPUT_ROLE, { required: false, pattern: /.*/ })}
         placeholder={constant.INPUT_ROLE_PLACEHOLDER}
         label={constant.INPUT_ROLE_LABEL}
-        onChange={onValueChange}
         hasLabel
       />  {/* // TODO: Give choices to employee */}
       <Button text={constant.BUTTON_TEXT} onClick={submit}/>

@@ -1,5 +1,5 @@
 /* eslint-disable no-import-assign */
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import * as auth from 'firebase/auth';
@@ -18,7 +18,7 @@ jest.mock('../../api/apiLayer', () => ({
   addBusiness: jest.fn(),
 }));
 
-describe('logic test', () => {
+describe('login logic test', () => {
   afterEach(() => {
     (API.getBusiness as jest.MockedFunction<typeof API.getBusiness>).mockClear();
     (API.addBusiness as jest.MockedFunction<typeof API.addBusiness>).mockClear();
@@ -43,10 +43,11 @@ describe('logic test', () => {
     );
 
     expect(screen.getByText(businessConstant.FORM_HEADING)).toBeInTheDocument();
-    userEvent.click(screen.getByText(businessConstant.SUBMIT_BUTTON_TEXT));
+    userEvent.type(screen.getByRole('textbox'), 'businessId');
+    await act(async () => userEvent.click(await screen.findByText(businessConstant.SUBMIT_BUTTON_TEXT)));
 
     expect(await screen.findByText(/ADMIN PAGE/)).toBeInTheDocument();
-    expect(API.getBusiness).toHaveBeenCalledWith('');
+    expect(API.getBusiness).toHaveBeenCalledWith('businessId');
   });
 
   test('login page business unsuccessful business creation', async () => {
@@ -66,11 +67,12 @@ describe('logic test', () => {
       </AuthProvider>
     );
 
-    userEvent.click(screen.getByText(businessConstant.SUBMIT_BUTTON_TEXT));
+    userEvent.type(screen.getByRole('textbox'), 'businessId');
+    await act(async () => userEvent.click(await screen.findByText(businessConstant.SUBMIT_BUTTON_TEXT)));
 
     expect(screen.queryByText(/ADMIN PAGE/)).not.toBeInTheDocument();
-    expect(screen.getByText(businessConstant.FORM_HEADING)).toBeInTheDocument();
-    expect(API.getBusiness).toHaveBeenCalledWith('');
+    expect(await screen.findByText(businessConstant.FORM_HEADING)).toBeInTheDocument();
+    expect(API.getBusiness).toHaveBeenCalledWith('businessId');
   });
 
   test('login page business logic successful business creation', async () => {
@@ -102,14 +104,16 @@ describe('logic test', () => {
     );
 
     expect(screen.getByRole('heading', { name: ProfileConstant.FORM_TITLE })).toBeInTheDocument();
-    userEvent.click(screen.getByText(/Next/));
+    await act(async () => userEvent.click(screen.getByText(/Next/)));
     expect(await screen.findByRole('heading', { name: AdminConstant.FORM_TITLE })).toBeInTheDocument();
-    userEvent.click(await screen.findByText(/Next/));
+    await act(async () => userEvent.click(await screen.findByText(/Next/)));
     expect(await screen.findByText(/submit/)).toBeInTheDocument();
-    userEvent.click(await screen.findByText(/submit/));
-    expect(auth.createUserWithEmailAndPassword).toHaveBeenCalled();
+    await act(async () => userEvent.click(await screen.findByText(/submit/)));
     expect(await screen.findByText(/DASHBOARD PAGE/)).toBeInTheDocument();
-    expect(API.register).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(API.register).toHaveBeenCalled();
+      expect(auth.createUserWithEmailAndPassword).toHaveBeenCalled();
+    });
   });
 
   test('login page business logic unsuccessful business creation', async () => {
@@ -135,23 +139,22 @@ describe('logic test', () => {
       </AuthProvider>
     );
 
-    userEvent.click(screen.getByText(/Next/));
-    userEvent.click(await screen.findByText(/Next/));
-    userEvent.click(await screen.findByText(/submit/));
+    await act(async () => userEvent.click(await screen.findByText(/Next/)));
+    await act(async () => userEvent.click(await screen.findByText(/Next/)));
+    await act(async () => userEvent.click(await screen.findByText(/submit/)));
     expect(auth.createUserWithEmailAndPassword).toHaveBeenCalled();
     expect(screen.queryByText(/DASHBOARD PAGE/)).not.toBeInTheDocument();
     expect(await screen.findByText(/Yeah/)).toBeInTheDocument();
     expect(API.register).not.toHaveBeenCalled();
   });
 
-  test('login page business logic unsuccessful business creation', async () => {
+  test('login page business logic unsuccessful business creation on firebase error', async () => {
     // @ts-expect-error
     (API.addBusiness as jest.MockedFunction<typeof API.addBusiness>).mockResolvedValueOnce({
       status: 400,
     });
     // @ts-expect-error
-    auth.createUserWithEmailAndPassword.mockReturnValueOnce(
-      Promise.reject(new Error('an error occur')));
+    auth.createUserWithEmailAndPassword.mockRejectedValue(new Error('an error occur'));
 
     render(
       <AuthProvider>
@@ -164,12 +167,13 @@ describe('logic test', () => {
       </AuthProvider>
     );
 
-    userEvent.click(screen.getByText(/Next/));
-    userEvent.click(await screen.findByText(/Next/));
-    userEvent.click(await screen.findByText(/submit/));
-    expect(auth.createUserWithEmailAndPassword).toHaveBeenCalled();
+    await act(async () => userEvent.click(screen.getByText(/Next/)));
+    await act(async () => userEvent.click(await screen.findByText(/Next/)));
+    await act(async () => userEvent.click(await screen.findByText(/submit/)));
+
     expect(screen.queryByText(/DASHBOARD PAGE/)).not.toBeInTheDocument();
     expect(await screen.findByText(/Yeah/)).toBeInTheDocument();
+    expect(auth.createUserWithEmailAndPassword).toHaveBeenCalled();
     expect(API.addBusiness).not.toHaveBeenCalled();
     expect(API.register).not.toHaveBeenCalled();
   });

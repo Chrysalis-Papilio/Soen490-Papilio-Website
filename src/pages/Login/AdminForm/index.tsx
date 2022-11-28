@@ -20,7 +20,8 @@ export const initialState: IFormData = {
 };
 
 const AdminForm = ({ onSubmit }: IAdminForm): JSX.Element => {
-  const [formData, onValueChange, submit] = useFormData<IFormData>({ initialState, onSubmit });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_unused1, _unused2, _unused3, register, submit] = useFormData<IFormData>({ initialState, onSubmit });
 
   return (
     <BoxForm
@@ -31,25 +32,19 @@ const AdminForm = ({ onSubmit }: IAdminForm): JSX.Element => {
       hasBack
     >
       <Input
-        name={constant.INPUT_ADMIN_NAME}
-        value={formData.adminName}
         placeholder={constant.INPUT_ADMIN_NAME_PLACEHOLDER}
         label={constant.INPUT_ADMIN_NAME_LABEL}
-        onChange={onValueChange}
+        {...register(constant.INPUT_ADMIN_NAME, { required: false, pattern: /.*/ })}
         hasLabel/>
       <Input
-        name={constant.INPUT_ADMIN_EMAIL}
-        value={formData.adminEmail}
         placeholder={constant.INPUT_ADMIN_EMAIL_PLACEHOLDER}
         label={constant.INPUT_ADMIN_EMAIL_LABEL}
-        onChange={onValueChange}
+        {...register(constant.INPUT_ADMIN_EMAIL, { required: false, pattern: /.*/ })}
         hasLabel/>
       <Input
-        name={constant.INPUT_ADMIN_PASSWORD}
-        value={formData.adminPassword}
+        {...register(constant.INPUT_ADMIN_PASSWORD, { required: false, pattern: /.*/ })}
         placeholder={constant.INPUT_ADMIN_PASSWORD_PLACEHOLDER}
         label={constant.INPUT_ADMIN_PASSWORD_LABEL}
-        onChange={onValueChange}
         type="password"
         hasLabel/>
     </BoxForm>

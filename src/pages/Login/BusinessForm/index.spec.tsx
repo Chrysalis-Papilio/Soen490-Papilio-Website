@@ -1,28 +1,45 @@
-// import React, { useState } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 
-import AdminForm from '.';
+import BusinessForm from '.';
 import * as constant from './constant';
 
-test('logic test', () => {
-  const mockOnSubmit = jest.fn();
+describe('business id form test', () => {
+  test('successful login on entering a businessId', async () => {
+    const mockOnSubmit = jest.fn();
 
-  render(
+    render(
     <MemoryRouter>
-      <AdminForm onSubmit={mockOnSubmit} />
+      <BusinessForm onSubmit={mockOnSubmit} />
     </MemoryRouter>
-  );
+    );
 
-  expect(screen.getByText(constant.FORM_HEADING)).toBeInTheDocument();
-  userEvent.type(screen.getByPlaceholderText(constant.INPUT_BUSINESS_PLACEHOLDER), 'MyAmazingBillionDollarCompany');
+    expect(screen.getByText(constant.FORM_HEADING)).toBeInTheDocument();
+    userEvent.type(screen.getByRole('textbox'), 'MyAmazingBillionDollarCompany');
 
-  userEvent.click(screen.getByText(constant.SUBMIT_BUTTON_TEXT));
+    await act(async () => userEvent.click(await screen.findByText(constant.SUBMIT_BUTTON_TEXT)));
 
-  expect(mockOnSubmit).toHaveBeenCalledWith(
-    expect.objectContaining({
-      [constant.INPUT_BUSINESS_ID]: 'MyAmazingBillionDollarCompany',
-    })
-  );
+    await waitFor(() => expect(mockOnSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [constant.INPUT_BUSINESS_ID]: 'MyAmazingBillionDollarCompany',
+      })
+    ));
+  });
+
+  test('error when not providing a businessId', async () => {
+    const mockOnSubmit = jest.fn();
+
+    render(
+    <MemoryRouter>
+      <BusinessForm onSubmit={mockOnSubmit} />
+    </MemoryRouter>
+    );
+
+    expect(screen.getByText(constant.FORM_HEADING)).toBeInTheDocument();
+    await act(async () => userEvent.click(await screen.findByText(constant.SUBMIT_BUTTON_TEXT)));
+
+    await waitFor(() => expect(mockOnSubmit).not.toHaveBeenCalled());
+    expect(await screen.findByText(constant.REQUIRED_MESSAGE)).toBeInTheDocument();
+  });
 });

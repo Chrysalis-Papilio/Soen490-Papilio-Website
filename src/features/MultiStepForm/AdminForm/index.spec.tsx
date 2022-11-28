@@ -1,4 +1,4 @@
-import { screen, render } from '@testing-library/react';
+import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import AdminForm, { IFormData } from '.';
@@ -26,19 +26,19 @@ describe('profile form test', () => {
     const mockOnBack = jest.fn();
     render(<AdminForm initialState={initialState} onSubmit={mockOnSubmit} onBack={mockOnBack}/>);
 
-    userEvent.type(screen.getByRole('textbox', { name: /Name/i }), 'Jonh Doe');
-    userEvent.type(screen.getByRole('textbox', { name: /Email/i }), 'jdoe@email.com');
-    userEvent.type(screen.getByRole('textbox', { name: /Password/i }), 'password');
-    userEvent.click(screen.getByText('Next'));
+    userEvent.type(await screen.findByRole('textbox', { name: /Name/i }), 'Jonh Doe');
+    userEvent.type(await screen.findByRole('textbox', { name: /Email/i }), 'jdoe@email.com');
+    userEvent.type(await screen.findByRole('textbox', { name: /Password/i }), 'password');
+    userEvent.click(await screen.findByText('Next'));
 
-    expect(mockOnSubmit).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockOnSubmit).toHaveBeenCalledWith(
       {
         adminName: 'Jonh Doe',
         adminEmail: 'jdoe@email.com',
         adminPassword: 'password',
         role: 'Admin',
       }
-    );
+    ));
   });
 
   it('should send inputs value to save when back', async () => {

@@ -33,85 +33,70 @@ const initialState: IFormData = {
 };
 
 const AddForm = ({ onSubmit }: AddFormInterface): JSX.Element => {
-  const [formData, onValueChange, submit] = useFormData<IFormData>({ initialState, onSubmit });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_unused1, _unused2, _unused3, register, submit] = useFormData<IFormData>({ initialState, onSubmit });
 
   return (
     <div>
       <h2 className="text-2xl font-semibold mt-4.5">{constant.FORM_HEADLINE}</h2>
       <Input
-        name={constant.INPUT_ACTIVITY_TITLE}
-        value={formData.activityTitle}
+        {...register(constant.INPUT_ACTIVITY_TITLE, { required: false, pattern: /.*/ })}
         placeholder={constant.INPUT_ACTIVITY_TITLE_PLACEHOLDER}
         label={constant.INPUT_ACTIVITY_TITLE_LABEL}
-        onChange={onValueChange}
         hasLabel
       />
       <Input
-        name={constant.INPUT_ACTIVITY_LOCATION}
-        value={formData.activityLocation}
+        {...register(constant.INPUT_ACTIVITY_LOCATION, { required: false, pattern: /.*/ })}
         placeholder={constant.INPUT_ACTIVITY_LOCATION_PLACEHOLDER}
         label={constant.INPUT_ACTIVITY_LOCATION_LABEL}
-        onChange={onValueChange}
         hasLabel
       />
       <div className='flex'>
         <div className='pr-10'>
           <Input
-            name={constant.INPUT_ACTIVITY_START}
-            value={formData.activityStart}
+            {...register(constant.INPUT_ACTIVITY_START, { required: false, pattern: /.*/ })}
             placeholder={constant.INPUT_ACTIVITY_START_PLACEHOLDER}
             label={constant.INPUT_ACTIVITY_START_LABEL}
-            onChange={onValueChange}
             hasLabel
           />
         </div>
         <div>
           <Input
-            name={constant.INPUT_ACTIVITY_END}
-            value={formData.activityEnd}
+            {...register(constant.INPUT_ACTIVITY_END, { required: false, pattern: /.*/ })}
             placeholder={constant.INPUT_ACTIVITY_END_PLACEHOLDER}
             label={constant.INPUT_ACTIVITY_END_LABEL}
-            onChange={onValueChange}
             hasLabel
           />
         </div>
       </div>
       <Input
-        name={constant.INPUT_ACTIVITY_DESCRIPTION}
-        value={formData.activityDescription}
+        {...register(constant.INPUT_ACTIVITY_DESCRIPTION, { required: false, pattern: /.*/ })}
         placeholder={constant.INPUT_ACTIVITY_DESCRIPTION_PLACEHOLDER}
         label={constant.INPUT_ACTIVITY_DESCRIPTION_LABEL}
-        onChange={onValueChange}
         hasLabel
       />
       <div className='flex'>
         <div className='pr-10'>
           <Input
-            name={constant.INPUT_ACTIVITY_COST_INDV}
-            value={formData.activityCostIndv}
+            {...register(constant.INPUT_ACTIVITY_COST_INDV, { required: false, pattern: /.*/ })}
             placeholder={constant.INPUT_ACTIVITY_COST_INDV_PLACEHOLDER}
             label={constant.INPUT_ACTIVITY_COST_INDV_LABEL}
-            onChange={onValueChange}
             hasLabel
           />
         </div>
         <div className='pr-10'>
         <Input
-            name={constant.INPUT_ACTIVITY_COST_GROUP}
-            value={formData.activityCostGroup}
+            {...register(constant.INPUT_ACTIVITY_COST_GROUP, { required: false, pattern: /.*/ })}
             placeholder={constant.INPUT_ACTIVITY_COST_GROUP_PLACEHOLDER}
             label={constant.INPUT_ACTIVITY_COST_GROUP_LABEL}
-            onChange={onValueChange}
             hasLabel
           />
         </div>
         <div>
         <Input
-            name={constant.INPUT_ACTIVITY_GROUP}
-            value={formData.activityGroupSize}
+            {...register(constant.INPUT_ACTIVITY_GROUP, { required: false, pattern: /.*/ })}
             placeholder={constant.INPUT_ACTIVITY_GROUP_PLACEHOLDER}
             label={constant.INPUT_ACTIVITY_GROUP_LABEL}
-            onChange={onValueChange}
             hasLabel
           />
         </div>

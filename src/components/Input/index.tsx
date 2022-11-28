@@ -13,10 +13,12 @@ export declare interface InputInterface {
   size?: 'sm' | 'md' | 'lg'
   labelPosition?: 'top' | 'left'
   variant?: 'normal' | 'ghost'
+  isError?: boolean
   onChange: (data: React.FormEvent<HTMLInputElement>) => void
+  onBlur?: () => void
 }
 
-const Input = ({ ref, name, value, label, hasLabel = false, placeholder, onChange, type = 'text', testId, size = 'md', labelPosition = 'top', variant = 'normal' }: InputInterface): JSX.Element => {
+const Input = ({ ref, name, value, label, hasLabel = false, placeholder, onChange, type = 'text', testId, size = 'md', labelPosition = 'top', variant = 'normal', isError = false, onBlur = () => {} }: InputInterface): JSX.Element => {
   const className = classNames('flex items-center relative', {
     'mb-2': variant === 'normal',
     'pt-5': hasLabel,
@@ -31,6 +33,7 @@ const Input = ({ ref, name, value, label, hasLabel = false, placeholder, onChang
     'py-3 px-3': size === 'lg',
     'w-4/6': labelPosition === 'left',
     'flex-1': labelPosition === 'top',
+    'border-red-500 focus:border-red-500': isError,
   });
 
   const ghostInputStyle = classNames('w-full bg-transparent');
@@ -58,6 +61,7 @@ const Input = ({ ref, name, value, label, hasLabel = false, placeholder, onChang
         value={value}
         type={type}
         onChange={onChange}
+        onBlur={onBlur}
       />
     </div>
   );
